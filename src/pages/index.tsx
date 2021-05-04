@@ -71,6 +71,10 @@ export default function Home() {
           </div>
         </a>
       </section>
+
+      <button type="button" className={styles['load-more-posts']}>
+        Carregar mais posts
+      </button>
     </main>
   );
 }
