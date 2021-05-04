@@ -1,1 +1,47 @@
-// TODO
+.header {
+  margin: 3rem 0;
+}
+
+.post-list {
+  a {
+    display: block;
+
+    & + a {
+      margin-top: 3rem;
+    }
+
+    h1 {
+      color: var(--heading);
+      font-size: 1.8rem;
+      font-weight: 700;
+      line-height: 2rem;
+    }
+
+    p {
+      margin-top: 0.5rem;
+
+      line-height: 1.625rem;
+    }
+
+    .info {
+      display: flex;
+
+      margin-top: 1rem;
+
+      color: var(--info);
+
+      svg {
+        margin-right: 5px;
+      }
+
+      div + div {
+        margin-left: 1rem;
+      }
+
+      div {
+        display: flex;
+        align-items: center;
+      }
+    }
+  }
+}
