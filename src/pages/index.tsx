@@ -1,4 +1,5 @@
 import { GetStaticProps } from 'next';
+import Link from 'next/link';
 
 import { FiCalendar, FiUser } from 'react-icons/fi';
 
@@ -34,42 +35,46 @@ export default function Home() {
       </header>
 
       <section className={styles['post-list']}>
-        <a>
-          <h1>Como utilizar Hooks</h1>
-          <p>Pensando em sincronização em vez de ciclos de vida.</p>
+        <Link href="/post/1">
+          <a>
+            <h1>Como utilizar Hooks</h1>
+            <p>Pensando em sincronização em vez de ciclos de vida.</p>
 
-          <div className={styles.info}>
-            <div>
-              <FiCalendar width={20} height={20} />
-              <time>15 Mar 2021</time>
+            <div className={styles.info}>
+              <div>
+                <FiCalendar width={20} height={20} />
+                <time>15 Mar 2021</time>
+              </div>
+
+              <div>
+                <FiUser width={20} height={20} />
+                <span>Alexandre Monteiro</span>
+              </div>
             </div>
+          </a>
+        </Link>
 
-            <div>
-              <FiUser width={20} height={20} />
-              <span>Alexandre Monteiro</span>
+        <Link href="/post/1">
+          <a>
+            <h1>Criando um app CRA do zero</h1>
+            <p>
+              Tudo sobre como criar a sua primeira aplicação utilizando Create
+              React App.
+            </p>
+
+            <div className={styles.info}>
+              <div>
+                <FiCalendar width={20} height={20} />
+                <time>15 Mar 2021</time>
+              </div>
+
+              <div>
+                <FiUser width={20} height={20} />
+                <span>Alexandre Monteiro</span>
+              </div>
             </div>
-          </div>
-        </a>
-
-        <a>
-          <h1>Criando um app CRA do zero</h1>
-          <p>
-            Tudo sobre como criar a sua primeira aplicação utilizando Create
-            React App.
-          </p>
-
-          <div className={styles.info}>
-            <div>
-              <FiCalendar width={20} height={20} />
-              <time>15 Mar 2021</time>
-            </div>
-
-            <div>
-              <FiUser width={20} height={20} />
-              <span>Alexandre Monteiro</span>
-            </div>
-          </div>
-        </a>
+          </a>
+        </Link>
       </section>
 
       <button type="button" className={styles['load-more-posts']}>

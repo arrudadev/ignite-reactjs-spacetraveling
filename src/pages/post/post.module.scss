@@ -1,1 +1,47 @@
-// TODO
+.banner {
+  width: 100%;
+
+  img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+  }
+}
+
+.main {
+  margin-top: 5rem;
+
+  h1 {
+    font-size: 3rem;
+    font-weight: 700;
+
+    color: var(--heading);
+  }
+
+  .info {
+    display: flex;
+    align-items: center;
+
+    margin-top: 1.5rem;
+
+    color: var(--info);
+
+    div + div {
+      margin-left: 1rem;
+    }
+
+    svg {
+      margin-right: 5px;
+    }
+
+    div {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  article {
+    margin-top: 4rem;
+    margin-bottom: 5rem;
+  }
+}
