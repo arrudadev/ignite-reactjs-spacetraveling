@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FiCalendar, FiUser } from 'react-icons/fi';
 
 import { GetStaticProps } from 'next';
@@ -53,7 +53,16 @@ function formatPosts(postsResponse: PostPagination) {
 }
 
 export default function Home({ postsPagination }: HomeProps) {
-  const [posts, setPosts] = useState(postsPagination);
+  const [posts, setPosts] = useState<PostPagination>(postsPagination);
+
+  useEffect(() => {
+    const formattedPosts = formatPosts(postsPagination);
+
+    setPosts({
+      next_page: postsPagination.next_page,
+      results: formattedPosts,
+    });
+  }, []);
 
   async function handleLoadMorePost() {
     const postsResponse: PostPagination = await fetch(`${posts.next_page}`)
@@ -123,7 +132,17 @@ export const getStaticProps: GetStaticProps = async () => {
     }
   );
 
-  const posts = formatPosts(postsResponse);
+  const posts = postsResponse.results.map(post => {
+    return {
+      uid: post.uid,
+      first_publication_date: post.first_publication_date,
+      data: {
+        title: post.data.title,
+        subtitle: post.data.subtitle,
+        author: post.data.author,
+      },
+    };
+  });
 
   return {
     props: {

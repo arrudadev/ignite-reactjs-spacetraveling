@@ -1,12 +1,15 @@
-import { GetStaticPaths, GetStaticProps } from 'next';
-
+import { useEffect, useState } from 'react';
 import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
+
+import { GetStaticPaths, GetStaticProps } from 'next';
+import { useRouter } from 'next/router';
 
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 import Prismic from '@prismicio/client';
 import { RichText } from 'prismic-dom';
+
 import { getPrismicClient } from '../../services/prismic';
 
 import Header from '../../components/Header';
@@ -16,15 +19,19 @@ import styles from './post.module.scss';
 
 interface Post {
   first_publication_date: string | null;
+  uid: string;
   data: {
     title: string;
+    subtitle: string;
     banner: {
       url: string;
     };
     author: string;
     content: {
       heading: string;
-      body: string;
+      body: {
+        text: string;
+      }[];
     }[];
   };
 }
@@ -34,47 +41,87 @@ interface PostProps {
 }
 
 export default function Post({ post }: PostProps) {
+  const [postFormatted, setPostFormatted] = useState(post);
+
+  const { isFallback } = useRouter();
+
+  useEffect(() => {
+    if (isFallback) {
+      return;
+    }
+
+    const body = post.data.content.map(content => ({
+      text: RichText.asHtml(content.body),
+    }));
+
+    const formatPost = {
+      ...postFormatted,
+      first_publication_date: format(
+        parseISO(post.first_publication_date),
+        'dd MMM yyyy',
+        { locale: ptBR }
+      ),
+      data: {
+        ...post.data,
+        content: post.data.content.map(content => ({
+          heading: content.heading,
+          body,
+        })),
+      },
+    };
+
+    setPostFormatted(formatPost);
+  }, [isFallback]);
+
   return (
     <>
-      <Header />
+      {isFallback ? (
+        <h1>Carregando...</h1>
+      ) : (
+        <>
+          <Header />
 
-      <section className={styles.banner}>
-        <img src={post.data.banner.url} alt="Banner" />
-      </section>
+          <section className={styles.banner}>
+            <img src={postFormatted?.data.banner.url} alt="Banner" />
+          </section>
 
-      <main className={`${commonStyles.container} ${styles.main}`}>
-        <h1>{post.data.title}</h1>
+          <main className={`${commonStyles.container} ${styles.main}`}>
+            <h1>{postFormatted?.data.title}</h1>
 
-        <div className={styles.info}>
-          <div>
-            <FiCalendar width={20} height={20} />
-            <time>{post.first_publication_date}</time>
-          </div>
+            <div className={styles.info}>
+              <div>
+                <FiCalendar width={20} height={20} />
+                <time>{postFormatted?.first_publication_date}</time>
+              </div>
 
-          <div>
-            <FiUser width={20} height={20} />
-            <span>{post.data.author}</span>
-          </div>
+              <div>
+                <FiUser width={20} height={20} />
+                <span>{postFormatted?.data.author}</span>
+              </div>
 
-          <div>
-            <FiClock width={20} height={20} />
-            <span>4 min</span>
-          </div>
-        </div>
+              <div>
+                <FiClock width={20} height={20} />
+                <span>4 min</span>
+              </div>
+            </div>
 
-        <article>
-          {post.data.content.map((content, index) => (
-            <section key={index}>
-              <h2>{content.heading}</h2>
+            <article>
+              {postFormatted?.data.content.map((content, index) => (
+                <section key={index}>
+                  <h2>{content.heading}</h2>
 
-              <div
-                className={styles.postContent}
-                dangerouslySetInnerHTML={{ __html: content.body }}
-              />
-            </section>
-          ))}
-        </article>
-      </main>
+                  <div
+                    className={styles.postContent}
+                    dangerouslySetInnerHTML={{
+                      __html: content.body[index].text,
+                    }}
+                  />
+                </section>
+              ))}
+            </article>
+          </main>
+        </>
+      )}
     </>
   );
 }
@@ -84,6 +131,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const postsResponse = await prismic.query(
     [Prismic.Predicates.at('document.type', 'posts')],
     {
+      fetch: ['posts.title'],
       pageSize: 1,
     }
   );
@@ -94,7 +142,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   return {
     paths,
-    fallback: 'blocking',
+    fallback: true,
   };
 };
 
@@ -104,24 +152,17 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const prismic = getPrismicClient();
   const response = await prismic.getByUID('posts', String(slug), {});
 
-  const post = {
-    first_publication_date: format(
-      parseISO(response.first_publication_date),
-      'dd MMM yyyy',
-      {
-        locale: ptBR,
-      }
-    ),
+  const post: Post = {
+    first_publication_date: response.first_publication_date,
+    uid: response.uid,
     data: {
       title: response.data.title,
-      banner: response.data.banner,
+      subtitle: response.data.subtitle,
+      banner: {
+        url: response.data.banner.url,
+      },
       author: response.data.author,
-      content: response.data.content.map(content => {
-        return {
-          heading: content.heading,
-          body: RichText.asHtml(content.body),
-        };
-      }),
+      content: response.data.content,
     },
   };
 
