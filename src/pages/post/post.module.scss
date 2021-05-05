@@ -43,5 +43,31 @@
   article {
     margin-top: 4rem;
     margin-bottom: 5rem;
+
+    section + section {
+      margin-top: 3rem;
+    }
+
+    h2 {
+      font-weight: 700;
+
+      color: var(--heading);
+    }
+
+    .postContent {
+      margin-top: 1.5rem;
+
+      strong {
+        color: var(--highlight);
+      }
+
+      ul {
+        margin: 1rem;
+
+        li + li {
+          margin-top: 1rem;
+        }
+      }
+    }
   }
 }
