@@ -1,7 +1,8 @@
+import { useState } from 'react';
+import { FiCalendar, FiUser } from 'react-icons/fi';
+
 import { GetStaticProps } from 'next';
 import Link from 'next/link';
-
-import { FiCalendar, FiUser } from 'react-icons/fi';
 
 import { format, parseISO } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
@@ -31,7 +32,45 @@ interface HomeProps {
   postsPagination: PostPagination;
 }
 
+function formatPosts(postsResponse: PostPagination) {
+  return postsResponse.results.map(post => {
+    return {
+      uid: post.uid,
+      first_publication_date: format(
+        parseISO(post.first_publication_date),
+        'dd MMM yyyy',
+        {
+          locale: ptBR,
+        }
+      ),
+      data: {
+        title: post.data.title,
+        subtitle: post.data.subtitle,
+        author: post.data.author,
+      },
+    };
+  });
+}
+
 export default function Home({ postsPagination }: HomeProps) {
+  const [posts, setPosts] = useState(postsPagination);
+
+  async function handleLoadMorePost() {
+    const postsResponse: PostPagination = await fetch(`${posts.next_page}`)
+      .then(response => response.json())
+      .then(data => data);
+
+    const formattedPosts = {
+      next_page: postsResponse.next_page,
+      results: formatPosts(postsResponse),
+    };
+
+    setPosts({
+      next_page: formattedPosts.next_page,
+      results: [...posts.results, ...formattedPosts.results],
+    });
+  }
+
   return (
     <main className={commonStyles.container}>
       <header className={styles.header}>
@@ -39,8 +78,8 @@ export default function Home({ postsPagination }: HomeProps) {
       </header>
 
       <section className={styles['post-list']}>
-        {postsPagination.results.map(post => (
-          <Link href="/post/1">
+        {posts.results.map(post => (
+          <Link href={`/post/${post.uid}`} key={post.uid}>
             <a>
               <h1>{post.data.title}</h1>
               <p>{post.data.subtitle}</p>
@@ -61,9 +100,15 @@ export default function Home({ postsPagination }: HomeProps) {
         ))}
       </section>
 
-      <button type="button" className={styles['load-more-posts']}>
-        Carregar mais posts
-      </button>
+      {posts.next_page && (
+        <button
+          type="button"
+          className={styles['load-more-posts']}
+          onClick={handleLoadMorePost}
+        >
+          Carregar mais posts
+        </button>
+      )}
     </main>
   );
 }
@@ -78,30 +123,15 @@ export const getStaticProps: GetStaticProps = async () => {
     }
   );
 
-  const posts = postsResponse.results.map(post => {
-    return {
-      uid: post.uid,
-      first_publication_date: format(
-        parseISO(post.first_publication_date),
-        'dd MMM yyyy',
-        {
-          locale: ptBR,
-        }
-      ),
-      data: {
-        title: post.data.title,
-        subtitle: post.data.subtitle,
-        author: post.data.author,
-      },
-    };
-  });
+  const posts = formatPosts(postsResponse);
 
   return {
     props: {
       postsPagination: {
         results: posts,
-        next_page: '',
+        next_page: postsResponse.next_page,
       },
     },
+    revalidate: 60 * 30, // 30 minutes
   };
 };
