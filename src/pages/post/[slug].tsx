@@ -12,6 +12,7 @@ import { RichText } from 'prismic-dom';
 
 import { getPrismicClient } from '../../services/prismic';
 
+import Comments from '../../components/Comments';
 import Header from '../../components/Header';
 
 import commonStyles from '../../styles/common.module.scss';
@@ -134,6 +135,8 @@ export default function Post({ post }: PostProps) {
                 </section>
               ))}
             </article>
+
+            <Comments />
           </main>
         </>
       )}
