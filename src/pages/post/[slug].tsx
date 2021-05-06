@@ -42,6 +42,7 @@ interface PostProps {
 
 export default function Post({ post }: PostProps) {
   const [postFormatted, setPostFormatted] = useState(post);
+  const [estimatedReadTime, setEstimatedReadTime] = useState('');
 
   const { isFallback } = useRouter();
 
@@ -71,6 +72,20 @@ export default function Post({ post }: PostProps) {
     };
 
     setPostFormatted(formatPost);
+
+    const numberOfWords = post.data.content.reduce((accumulator, content) => {
+      const contentAsText = RichText.asText(content.body);
+
+      const words = contentAsText.split(/\s/);
+
+      accumulator += words.length;
+
+      return accumulator;
+    }, 0);
+
+    const estimatedTime = Math.ceil(numberOfWords / 200);
+
+    setEstimatedReadTime(`${estimatedTime} min`);
   }, [isFallback]);
 
   return (
@@ -101,7 +116,7 @@ export default function Post({ post }: PostProps) {
 
               <div>
                 <FiClock width={20} height={20} />
-                <span>4 min</span>
+                <span>{estimatedReadTime}</span>
               </div>
             </div>
 
