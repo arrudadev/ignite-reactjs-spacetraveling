@@ -136,6 +136,18 @@ export default function Post({ post }: PostProps) {
               ))}
             </article>
 
+            <section className={styles.prevNextPostContainer}>
+              <button type="button">
+                <h3>Como utilizar Hooks</h3>
+                <p>Post anterior</p>
+              </button>
+
+              <button type="button">
+                <h3>Criando um app CRA do zero</h3>
+                <p>Post anterior</p>
+              </button>
+            </section>
+
             <Comments />
           </main>
         </>
