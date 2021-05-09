@@ -3,13 +3,13 @@ import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
 
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 import Prismic from '@prismicio/client';
 import { RichText } from 'prismic-dom';
-
 import { getPrismicClient } from '../../services/prismic';
 
 import Comments from '../../components/Comments';
@@ -37,11 +37,25 @@ interface Post {
   };
 }
 
-interface PostProps {
-  post: Post;
+interface PrevPost {
+  existsPrevPost: boolean;
+  uid: string;
+  title: string;
 }
 
-export default function Post({ post }: PostProps) {
+interface NextPost {
+  existsNextPost: boolean;
+  uid: string;
+  title: string;
+}
+
+interface PostProps {
+  post: Post;
+  prevPost?: PrevPost;
+  nextPost?: NextPost;
+}
+
+export default function Post({ post, prevPost, nextPost }: PostProps) {
   const [postFormatted, setPostFormatted] = useState(post);
   const [estimatedReadTime, setEstimatedReadTime] = useState('');
 
@@ -57,7 +71,7 @@ export default function Post({ post }: PostProps) {
     }));
 
     const formatPost = {
-      ...postFormatted,
+      ...post,
       first_publication_date: format(
         parseISO(post.first_publication_date),
         'dd MMM yyyy',
@@ -87,7 +101,23 @@ export default function Post({ post }: PostProps) {
     const estimatedTime = Math.ceil(numberOfWords / 200);
 
     setEstimatedReadTime(`${estimatedTime} min`);
-  }, [isFallback]);
+  }, [isFallback, post]);
+
+  function getClassPrevNextPostContainer() {
+    if (prevPost?.existsPrevPost && nextPost?.existsNextPost) {
+      return styles.hasPrevNextPost;
+    }
+
+    if (prevPost?.existsPrevPost) {
+      return styles.hasPrevPost;
+    }
+
+    if (nextPost?.existsNextPost) {
+      return styles.hasNextPost;
+    }
+
+    return '';
+  }
 
   return (
     <>
@@ -136,16 +166,32 @@ export default function Post({ post }: PostProps) {
               ))}
             </article>
 
-            <section className={styles.prevNextPostContainer}>
-              <button type="button">
-                <h3>Como utilizar Hooks</h3>
-                <p>Post anterior</p>
-              </button>
+            <section
+              className={`${
+                styles.prevNextPostContainer
+              } ${getClassPrevNextPostContainer()}`}
+            >
+              {prevPost?.existsPrevPost && (
+                <Link href={`/post/${prevPost.uid}`}>
+                  <a>
+                    <button type="button">
+                      <h3>{prevPost.title}</h3>
+                      <p>Post anterior</p>
+                    </button>
+                  </a>
+                </Link>
+              )}
 
-              <button type="button">
-                <h3>Criando um app CRA do zero</h3>
-                <p>Post anterior</p>
-              </button>
+              {nextPost?.existsNextPost && (
+                <Link href={`/post/${nextPost.uid}`}>
+                  <a>
+                    <button type="button">
+                      <h3>{nextPost.title}</h3>
+                      <p>Post anterior</p>
+                    </button>
+                  </a>
+                </Link>
+              )}
             </section>
 
             <Comments />
@@ -182,6 +228,24 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const prismic = getPrismicClient();
   const response = await prismic.getByUID('posts', String(slug), {});
 
+  const prevPost = await prismic.query(
+    [Prismic.Predicates.at('document.type', 'posts')],
+    {
+      pageSize: 1,
+      after: `${response.id}`,
+      orderings: '[document.first_publication_date desc]',
+    }
+  );
+
+  const nextPost = await prismic.query(
+    [Prismic.Predicates.at('document.type', 'posts')],
+    {
+      pageSize: 1,
+      after: `${response.id}`,
+      orderings: '[document.first_publication_date]',
+    }
+  );
+
   const post: Post = {
     first_publication_date: response.first_publication_date,
     uid: response.uid,
@@ -196,9 +260,21 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     },
   };
 
+  function getPrevNextPostData(currentPost, type) {
+    const existsKey = type === 'prev' ? 'existsPrevPost' : 'existsNextPost';
+    return {
+      [existsKey]: currentPost.results_size > 0,
+      title:
+        currentPost.results_size > 0 ? currentPost.results[0].data.title : '',
+      uid: currentPost.results_size > 0 ? currentPost.results[0].uid : '',
+    };
+  }
+
   return {
     props: {
       post,
+      prevPost: getPrevNextPostData(prevPost, 'prev'),
+      nextPost: getPrevNextPostData(nextPost, 'next'),
     },
     revalidate: 60 * 60 * 24, // 24 hours
   };
