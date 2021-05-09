@@ -54,9 +54,10 @@ interface PostProps {
   post: Post;
   prevPost?: PrevPost;
   nextPost?: NextPost;
+  preview?: boolean;
 }
 
-export default function Post({ post, prevPost, nextPost }: PostProps) {
+export default function Post({ post, prevPost, nextPost, preview }: PostProps) {
   const [postFormatted, setPostFormatted] = useState(post);
   const [estimatedReadTime, setEstimatedReadTime] = useState('');
 
@@ -73,16 +74,18 @@ export default function Post({ post, prevPost, nextPost }: PostProps) {
 
     const formatPost = {
       ...post,
-      first_publication_date: format(
-        parseISO(post.first_publication_date),
-        'dd MMM yyyy',
-        { locale: ptBR }
-      ),
-      last_publication_date: format(
-        parseISO(post.first_publication_date),
-        `dd MMM yyyy, 'às' kk:mm`,
-        { locale: ptBR }
-      ),
+      first_publication_date: post.first_publication_date
+        ? format(parseISO(post.first_publication_date), 'dd MMM yyyy', {
+            locale: ptBR,
+          })
+        : '09 Mai 2021 - Modo Preview',
+      last_publication_date: post.last_publication_date
+        ? format(
+            parseISO(post.last_publication_date),
+            `dd MMM yyyy, 'às' kk:mm`,
+            { locale: ptBR }
+          )
+        : '09 Mai 2021 - Modo Preview',
       data: {
         ...post.data,
         content: post.data.content.map(content => ({
@@ -207,6 +210,14 @@ export default function Post({ post, prevPost, nextPost }: PostProps) {
             </section>
 
             <Comments />
+
+            {preview && (
+              <aside className={commonStyles.exitPreviewMode}>
+                <Link href="/api/exit-preview">
+                  <a>Sair do modo Preview</a>
+                </Link>
+              </aside>
+            )}
           </main>
         </>
       )}
@@ -234,11 +245,17 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
+export const getStaticProps: GetStaticProps = async ({
+  params,
+  preview = false,
+  previewData,
+}) => {
   const { slug } = params;
 
   const prismic = getPrismicClient();
-  const response = await prismic.getByUID('posts', String(slug), {});
+  const response = await prismic.getByUID('posts', String(slug), {
+    ref: previewData?.ref ?? null,
+  });
 
   const prevPost = await prismic.query(
     [Prismic.Predicates.at('document.type', 'posts')],
@@ -288,6 +305,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       post,
       prevPost: getPrevNextPostData(prevPost, 'prev'),
       nextPost: getPrevNextPostData(nextPost, 'next'),
+      preview,
     },
     revalidate: 60 * 60 * 24, // 24 hours
   };

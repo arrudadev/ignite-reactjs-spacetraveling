@@ -30,19 +30,18 @@ interface PostPagination {
 
 interface HomeProps {
   postsPagination: PostPagination;
+  preview?: boolean;
 }
 
 function formatPosts(postsResponse: PostPagination) {
-  return postsResponse.results.map(post => {
+  return postsResponse?.results?.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: format(
-        parseISO(post.first_publication_date),
-        'dd MMM yyyy',
-        {
-          locale: ptBR,
-        }
-      ),
+      first_publication_date: post.first_publication_date
+        ? format(parseISO(post.first_publication_date), 'dd MMM yyyy', {
+            locale: ptBR,
+          })
+        : '09 Mai 2021 - Modo Preview',
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
@@ -52,7 +51,7 @@ function formatPosts(postsResponse: PostPagination) {
   });
 }
 
-export default function Home({ postsPagination }: HomeProps) {
+export default function Home({ postsPagination, preview }: HomeProps) {
   const [posts, setPosts] = useState<PostPagination>(postsPagination);
 
   useEffect(() => {
@@ -81,7 +80,7 @@ export default function Home({ postsPagination }: HomeProps) {
   }
 
   return (
-    <main className={commonStyles.container}>
+    <main className={`${commonStyles.container} ${styles.main}`}>
       <header className={styles.header}>
         <img src="/logo.svg" alt="logo" />
       </header>
@@ -118,17 +117,29 @@ export default function Home({ postsPagination }: HomeProps) {
           Carregar mais posts
         </button>
       )}
+
+      {preview && (
+        <aside className={commonStyles.exitPreviewMode}>
+          <Link href="/api/exit-preview">
+            <a>Sair do modo Preview</a>
+          </Link>
+        </aside>
+      )}
     </main>
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getStaticProps: GetStaticProps = async ({
+  preview = false,
+  previewData,
+}) => {
   const prismic = getPrismicClient();
   const postsResponse = await prismic.query(
     [Prismic.Predicates.at('document.type', 'posts')],
     {
       fetch: ['posts.title', 'posts.subtitle', 'posts.author'],
       pageSize: 1,
+      ref: previewData?.ref ?? null,
     }
   );
 
@@ -150,6 +161,7 @@ export const getStaticProps: GetStaticProps = async () => {
         results: posts,
         next_page: postsResponse.next_page,
       },
+      preview,
     },
     revalidate: 60 * 30, // 30 minutes
   };
