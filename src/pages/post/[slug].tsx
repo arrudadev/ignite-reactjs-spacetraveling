@@ -20,6 +20,7 @@ import styles from './post.module.scss';
 
 interface Post {
   first_publication_date: string | null;
+  last_publication_date?: string | null;
   uid: string;
   data: {
     title: string;
@@ -75,6 +76,11 @@ export default function Post({ post, prevPost, nextPost }: PostProps) {
       first_publication_date: format(
         parseISO(post.first_publication_date),
         'dd MMM yyyy',
+        { locale: ptBR }
+      ),
+      last_publication_date: format(
+        parseISO(post.first_publication_date),
+        `dd MMM yyyy, 'às' kk:mm`,
         { locale: ptBR }
       ),
       data: {
@@ -150,6 +156,12 @@ export default function Post({ post, prevPost, nextPost }: PostProps) {
                 <span>{estimatedReadTime}</span>
               </div>
             </div>
+
+            {postFormatted?.last_publication_date && (
+              <section className={styles.lastPublicationDate}>
+                * editado em <time>{postFormatted?.last_publication_date}</time>
+              </section>
+            )}
 
             <article>
               {postFormatted?.data.content.map((content, index) => (
@@ -248,6 +260,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
   const post: Post = {
     first_publication_date: response.first_publication_date,
+    last_publication_date: response.last_publication_date,
     uid: response.uid,
     data: {
       title: response.data.title,

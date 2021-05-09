@@ -40,6 +40,17 @@
     }
   }
 
+  .lastPublicationDate {
+    margin-top: 1rem;
+
+    color: var(--info);
+
+    font-style: italic;
+    font-size: 0.9rem;
+
+    line-height: 1rem;
+  }
+
   article {
     margin-top: 4rem;
     padding-bottom: 4rem;
