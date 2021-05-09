@@ -202,7 +202,7 @@ export default function Post({ post, prevPost, nextPost, preview }: PostProps) {
                   <a>
                     <button type="button">
                       <h3>{nextPost.title}</h3>
-                      <p>Post anterior</p>
+                      <p>Próximo post</p>
                     </button>
                   </a>
                 </Link>
