@@ -1,9 +1,13 @@
 import { useEffect, useRef } from 'react';
 
-export default function Comments() {
+interface CommentsProps {
+  postUid: string;
+}
+
+export default function Comments({ postUid }: CommentsProps) {
   const commentBoxRef = useRef<HTMLDivElement>();
 
-  useEffect(() => {
+  function renderUtterances() {
     const scriptElement = document.createElement('script');
     scriptElement.setAttribute('src', 'https://utteranc.es/client.js');
     scriptElement.setAttribute('crossorigin', 'anonymous');
@@ -29,7 +33,16 @@ export default function Comments() {
 
     commentBoxRef.current.appendChild(styleElement);
     commentBoxRef.current.appendChild(scriptElement);
-  }, []);
+  }
+
+  useEffect(() => {
+    if (commentBoxRef.current) {
+      commentBoxRef.current.innerHTML = '';
+      renderUtterances();
+    } else {
+      renderUtterances();
+    }
+  }, [postUid]);
 
   return <section ref={commentBoxRef} />;
 }

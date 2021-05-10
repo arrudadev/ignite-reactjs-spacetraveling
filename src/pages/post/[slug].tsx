@@ -209,7 +209,7 @@ export default function Post({ post, prevPost, nextPost, preview }: PostProps) {
               )}
             </section>
 
-            <Comments />
+            <Comments postUid={post.uid} />
 
             {preview && (
               <aside className={commonStyles.exitPreviewMode}>
