@@ -29,12 +29,13 @@ This project was developed with the following technologies:
 - [React](https://reactjs.org)
 - [NextJs](https://nextjs.org/)
 - [Prismic](https://prismic.io/)
+- [Utteranc](https://utteranc.es/)
 
 ## 🔖 Layout
 
-Credits to Rocketseat who created the Layout.
+Credits to [Rocketseat](https://github.com/Rocketseat) who created the Layout.
 
-You can view the project layout through [this link](https://www.figma.com/file/yKhO1e6EdWgqwXmbI8oPmg/Desafios-M%C3%B3dulo-3-ReactJS-Copy?node-id=0%3A1). You must have an account at [Figma] (http://figma.com/) to access it.
+You can view the project layout through [this link](https://www.figma.com/file/yKhO1e6EdWgqwXmbI8oPmg/Desafios-M%C3%B3dulo-3-ReactJS-Copy?node-id=0%3A1). You must have an account at [Figma](http://figma.com/) to access it.
 
 # :construction_worker: Installation
 
@@ -62,10 +63,6 @@ Or
 npm install
 ```
 
-### Prismic Configuration and Environment Variables configuration
-
-See [Prismic Configuration documentation](https://github.com/monteiro-alexandre/ignite-reactjs-spacetraveling/blob/master/docs/prismic-configuration.md) to configure your Prismic and fill in your environment variables.
-
 # :runner: Getting Started
 
 Run the following command in order to start the application in a development environment:
@@ -74,7 +71,7 @@ Run the following command in order to start the application in a development env
 
 # :bug: Issues
 
-Feel free to **file a new issue** with a respective title and description on the the [Ignews](https://github.com/monteiro-alexandre/ignite-reactjs-spacetraveling/issues) repository. If you already found a solution to your problem, **I would love to review your pull request**! Have a look at our [contribution guidelines](https://github.com/monteiro-alexandre/ignite-reactjs-spacetraveling/blob/master/CONTRIBUTING.md) to find out about the coding standards.
+Feel free to **file a new issue** with a respective title and description on the the [Spacetraveling](https://github.com/monteiro-alexandre/ignite-reactjs-spacetraveling/issues) repository. If you already found a solution to your problem, **I would love to review your pull request**! Have a look at our [contribution guidelines](https://github.com/monteiro-alexandre/ignite-reactjs-spacetraveling/blob/master/CONTRIBUTING.md) to find out about the coding standards.
 
 # :tada: Contributing
 
